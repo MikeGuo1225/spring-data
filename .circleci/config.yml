@@ -1,0 +1,28 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/repo
+
+    docker:
+      - image: $DOCKER_REPO_URL/circleci-jdk8:latest
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - springData-{{ checksum "pom.xml" }}
+
+      - setup_remote_docker
+
+      - run:
+          name: Publish client to repo
+          command: |
+            echo "Generate client source"
+            #additional version reference in dependency
+            FILE=pom.xml
+            echo "Updating: "$FILE
+            xmlstarlet ed --ps -N pom="http://maven.apache.org/POM/4.0.0" \
+                -u '//pom:project/pom:dependencies/pom:dependency[pom:artifactId="lombok"]/pom:version' \
+                $FILE > $FILE.new
+            mv $FILE.new $FILE

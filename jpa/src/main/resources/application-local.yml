@@ -1,0 +1,27 @@
+host:
+  database: localhost:5432/jpa
+  service: localhost:8001
+
+spring:
+  profiles:
+    active: local
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:root}
+    url: jdbc:postgresql://${host.database}
+
+  kafka:
+    bootstrap-servers: localhost:${KAFKA_BOOTSTRAP_PORT:19092}
+
+management:
+  server:
+    port: 0
+
+opentracing:
+  jaeger:
+    udp-sender:
+      host: localhost
+      port: 32772
+    enabled: true

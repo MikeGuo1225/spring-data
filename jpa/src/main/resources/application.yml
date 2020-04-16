@@ -1,10 +1,78 @@
+# Standard Spring properties
+server:
+  port: 8088
+
 spring:
-  datasource:
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/jpa
-    username: root
-    password: admin
+  application:
+    name: springData
+
+  profiles:
+    active: local
+
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQL9Dialect
+    open-in-view: false
+    show-sql: false
+    generate-ddl: false
+
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: none
+
+    properties:
+      hibernate.cache.use_second_level_cache: false
+      hibernate.cache.use_query_cache: false
+      hibernate.generate_statistics: true
+      hibernate.format_sql: true
+      hibernate.cache.region.factory_class: org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
+      hibernate.temp.use_jdbc_metadata_defaults: false
+      hibernate.enable_lazy_load_no_trans: true
+
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+
+  datasource:
+    hikari:
+      connection-timeout: 15000
+      minimum-idle: 1
+      maximum-pool-size: 20
+
+management:
+  metrics:
+    enable:
+      http.client.requests: false
+  endpoint:
+    health:
+      show-details: always
+    shutdown:
+      enabled: true
+  endpoints:
+    enabled-by-default: true
+    web:
+      exposure:
+        include: '*'
+  health:
+    db:
+      enabled: true
+  server:
+    port: 8081
+
+jmx:
+  enabled: true
+
+opentracing:
+  jaeger:
+    udp-sender:
+      host: ${JAEGER_AGENT_HOST}
+    const-sampler:
+      decision: true
+    log-spans: false
+
+shutdown:
+  terminationGracePeriodSeconds: 180
+
+elasticsearch:
+  host: localhost
+  port: 19200
+  scheme: http
+

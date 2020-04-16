@@ -42,9 +42,9 @@ public interface UserRepostitory extends JpaRepository<User, Integer>, /*用户�
     List<User> findByUsername(String username);
 
     //修改 (需要  @Modifying  配合 ,必须要有 事物, 不然报错)
-    @Transactional //为方便起见,事物暂时写在 dao 层
-    @Modifying //注解完成修改操作（注意：不支持新增）
-    @Query(value = "update User  u set  u.age=?2 where u.id =?1")
-    void updateAge(Integer id, Integer age);
+//    @Transactional //为方便起见,事物暂时写在 dao 层
+//    @Modifying //注解完成修改操作（注意：不支持新增）
+//    @Query(value = "update User  u set  u.age=?2 where u.id =?1")
+//    void updateAge(Integer id, Integer age);
 
 }

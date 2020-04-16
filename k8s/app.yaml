@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: springData
+    archetype: next-spring-boot-v1
+  name: springData
+  namespace: default
+spec:
+  replicas: $REPLICAS
+  selector:
+    matchLabels:
+      app: springData
+  template:
+    metadata:
+      labels:
+        app: springData
+        archetype: next-spring-boot-v1
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - springData
+              topologyKey: "kubernetes.io/hostname"
+            weight: 100
+
+      containers:
+      - name: springData
+        image: ${DOCKER_REPO_URL}/springData:${IMAGE_VERSION}
+        imagePullPolicy: Always
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: $SPRING_PROFILES_ACTIVE
+        - name: JASYPT_ENCRYPTOR_PASSWORD
+          value: $JASYPT_ENCRYPTOR_PASSWORD
+        - name: JAEGER_AGENT_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+          name: http
+        - containerPort: 8081
+          protocol: TCP
+          name: monitoring
+        - containerPort: 1099
+          protocol: TCP
+          name: jmx
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: monitoring
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: monitoring
+          failureThreshold: 2
+          periodSeconds: 5
+          timeoutSeconds: 5
+      terminationGracePeriodSeconds: 180
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: springData
+    archetype: next-spring-boot-v1
+  name: trips
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  - name: monitoring
+    port: 8081
+    protocol: TCP
+  selector:
+    app: springData
+  type: ClusterIP
